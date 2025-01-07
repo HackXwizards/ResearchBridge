@@ -1,0 +1,151 @@
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const SignupPage = () => {
+  // const shouldReduceMotion = useReducedMotion();
+
+  const animations = {
+    container: {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          when: "beforeChildren",
+          staggerChildren: 0.2,
+          ease: [0.25, 0.1, 0.25, 1],
+          duration: 0.8,
+        },
+      },
+    },
+    field: {
+      hidden: {
+        opacity: 0,
+        y: 20,
+      },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+          duration: 0.6,
+          ease: [0.25, 0.1, 0.25, 1],
+        },
+      },
+    },
+    button: {
+      hidden: { opacity: 0, scale: 0.9 },
+      visible: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+          type: "spring",
+          stiffness: 100,
+          damping: 15,
+        },
+      },
+      hover: {
+        scale: 1.05,
+        transition: { duration: 0.2, ease: "easeInOut" },
+      },
+    },
+  };
+
+  const [ref, inView] = useInView({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
+
+  return (
+    <section
+      ref={ref}
+      className="min-h-[85vh] mt-20 flex items-center justify-center py-4 px-6 sm:px-8"
+    >
+      <div className="max-w-md w-full">
+        <Card className="backdrop-blur-sm bg-white/80 shadow-xl border border-gray-200/50 rounded-2xl overflow-hidden">
+          <CardContent className="p-6 sm:p-8">
+            <motion.div
+              variants={animations.container}
+              initial="hidden"
+              animate={inView ? "visible" : "hidden"}
+              className="space-y-6"
+            >
+              <motion.h2
+                variants={animations.field}
+                className="text-2xl sm:text-3xl font-bold text-center"
+              >
+                Create Your Account
+              </motion.h2>
+              <motion.p
+                variants={animations.field}
+                className="text-gray-600 text-center"
+              >
+                Join us today and start collaborating
+              </motion.p>
+              <motion.form
+                variants={animations.container}
+                className="space-y-4"
+              >
+                <motion.div variants={animations.field}>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    placeholder="Enter your name"
+                    className="mt-1"
+                  />
+                </motion.div>
+                <motion.div variants={animations.field}>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    placeholder="Enter your email"
+                    className="mt-1"
+                  />
+                </motion.div>
+                <motion.div variants={animations.field}>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    type="password"
+                    id="password"
+                    placeholder="Create a password"
+                    className="mt-1"
+                  />
+                </motion.div>
+                <motion.div
+                  variants={animations.button}
+                  whileHover="hover"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    Sign Up
+                  </Button>
+                </motion.div>
+              </motion.form>
+              <motion.div
+                variants={animations.field}
+                className="text-center text-sm text-gray-600"
+              >
+                Already have an account?{" "}
+                <a
+                  href="/login"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Log in
+                </a>
+              </motion.div>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  );
+};
+
+export default SignupPage;
