@@ -1,4 +1,10 @@
-import { BookOpen, FileText, Image, Table as TableIcon, List } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  Image,
+  Table as TableIcon,
+  List,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -35,21 +41,23 @@ export const Toolbar = ({
   };
 
   const handleImageClick = () => {
-    const url = window.prompt('Enter image URL:');
+    const url = window.prompt("Enter image URL:");
     if (url && editor) {
       editor.chain().focus().setImage({ src: url }).run();
     }
   };
 
   const addTable = () => {
-    editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor
+      ?.chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run();
   };
 
   return (
     <div className="border-b p-2 flex justify-between items-center bg-gray-50">
       <div className="flex gap-2">
-        
-
         {/* Formatting */}
         <div className="flex items-center space-x-1 border-r pr-2">
           <Button
@@ -74,7 +82,11 @@ export const Toolbar = ({
         <div className="flex items-center space-x-1 border-r pr-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={onShowReferenceManager}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onShowReferenceManager}
+              >
                 <BookOpen className="w-4 h-4 mr-1" />
                 Add Citation
               </Button>
@@ -82,11 +94,7 @@ export const Toolbar = ({
             <TooltipContent>Insert citation from library</TooltipContent>
           </Tooltip>
 
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleImageClick}
-          >
+          <Button variant="ghost" size="sm" onClick={handleImageClick}>
             <Image className="w-4 h-4 mr-1" />
             Figure
           </Button>
@@ -97,7 +105,7 @@ export const Toolbar = ({
             variant="ghost"
             size="sm"
             onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-            className={editor?.isActive('codeBlock') ? "bg-gray-200" : ""}
+            className={editor?.isActive("codeBlock") ? "bg-gray-200" : ""}
           >
             <Code className="w-4 h-4 mr-1" />
             Code Block
@@ -106,16 +114,12 @@ export const Toolbar = ({
 
         {/* Table Controls */}
         <div className="flex items-center space-x-1 border-r pr-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={addTable}
-          >
+          <Button variant="ghost" size="sm" onClick={addTable}>
             <TableIcon className="w-4 h-4 mr-1" />
             Insert Table
           </Button>
-          
-          {editor?.isActive('table') && (
+
+          {editor?.isActive("table") && (
             <>
               <Button
                 variant="ghost"
@@ -148,27 +152,31 @@ export const Toolbar = ({
             variant="ghost"
             size="sm"
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
-            className={editor?.isActive('bulletList') ? "bg-gray-200" : ""}
+            className={editor?.isActive("bulletList") ? "bg-gray-200" : ""}
           >
             <List className="w-4 h-4 mr-1" />
             Bullet List
           </Button>
-          
-          {editor?.isActive('listItem') && (
+
+          {editor?.isActive("listItem") && (
             <>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => editor?.chain().focus().sinkListItem('listItem').run()}
-                disabled={!editor?.can().sinkListItem('listItem')}
+                onClick={() =>
+                  editor?.chain().focus().sinkListItem("listItem").run()
+                }
+                disabled={!editor?.can().sinkListItem("listItem")}
               >
                 Indent
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => editor?.chain().focus().liftListItem('listItem').run()}
-                disabled={!editor?.can().liftListItem('listItem')}
+                onClick={() =>
+                  editor?.chain().focus().liftListItem("listItem").run()
+                }
+                disabled={!editor?.can().liftListItem("listItem")}
               >
                 Outdent
               </Button>
@@ -184,16 +192,12 @@ export const Toolbar = ({
             disabled={isExporting}
           >
             {isExporting ? "Exporting..." : "Export PDF"}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onExport("latex")}
-        >
-          Export LaTeX
-        </Button>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onExport("latex")}>
+            Export LaTeX
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };

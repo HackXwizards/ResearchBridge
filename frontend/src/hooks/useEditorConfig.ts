@@ -109,8 +109,7 @@ export const useEditorConfig = (
       ],
       editorProps: {
         attributes: {
-          class: "prose prose-lg max-w-none focus:outline-none min-h-[800px] px-8 py-6",
-          
+          class: "prose prose-sm max-w-none focus:outline-none",
         },
       },
       content: `

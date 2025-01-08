@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 
 import { Citation } from "../../extensions/CitationExtension";
-// import {Abstract} from '../extensions/AbstractExtension'
 import { CitationService } from "../../services/CitationService";
 import { ReferenceManager } from "./ReferenceManager";
 import * as Y from "yjs";
@@ -235,19 +234,7 @@ const CollaborativeEditor = ({
   }, [editor, handleContentUpdate]);
 
   // Add image size limits and optimization
-  const handleImageUpload = useCallback(async (file: File) => {
-    const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      // Compress image before inserting
-      try {
-        const compressedFile = await compressImage(file);
-        // Insert compressed image
-      } catch (error) {
-        console.error("Failed to compress image:", error);
-      }
-    }
-  }, []);
+ 
 
   // Add this effect to configure awareness settings
   useEffect(() => {
@@ -262,22 +249,25 @@ const CollaborativeEditor = ({
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
-      <Toolbar
-        editor={editor}
-        onShowReferenceManager={() => setShowReferenceManager(true)}
-        onExport={handleExport}
-      />
-      <div className="border-b p-2 flex justify-between items-center bg-gray-50">
-        <CollaboratorsList collaborators={collaborators} />
+      <div className="toolbar-container">
+        <Toolbar
+          editor={editor}
+          onShowReferenceManager={() => setShowReferenceManager(true)}
+          onExport={handleExport}
+        />
+        <div className="border-b p-2 flex justify-between items-center bg-gray-50">
+          <CollaboratorsList collaborators={collaborators} />
+        </div>
       </div>
-      
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-y-auto bg-amber-50">
-        <div>
-          
+      <div className="editor-container">
+        <div className="a4-page">
+          <EditorContent 
+            editor={editor} 
+            className="prose prose-sm max-w-none focus:outline-none" 
+          />
         </div>
-        <EditorContent editor={editor} />
       </div>
 
       {/* Reference Manager Modal */}
