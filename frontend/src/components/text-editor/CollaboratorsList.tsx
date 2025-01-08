@@ -4,17 +4,24 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CollaboratorInfo } from "@/types";
 
-interface CollaboratorAvatarsProps {
+interface CollaboratorInfo {
+  name: string;
+  fullName: string;
+  color: string;
+  avatar?: string;
+  role?: string;
+}
+
+interface CollaboratorsListProps {
   collaborators: CollaboratorInfo[];
 }
 
-export const CollaboratorAvatars = ({ collaborators }: CollaboratorAvatarsProps) => {
+export const CollaboratorsList = ({ collaborators }: CollaboratorsListProps) => {
   return (
-    <div className="flex -space-x-2" >
-      {collaborators.map((collaborator) => (
-        <Tooltip key={collaborator.sessionId}>
+    <div className="flex -space-x-2">
+      {collaborators.map((collaborator, index) => (
+        <Tooltip key={index}>
           <TooltipTrigger asChild>
             <Avatar
               className="w-8 h-8 border-2 border-white cursor-pointer ring-2 ring-offset-2"
@@ -23,9 +30,7 @@ export const CollaboratorAvatars = ({ collaborators }: CollaboratorAvatarsProps)
                 borderColor: collaborator.color,
               }}
             >
-              <AvatarFallback className="font-semibold text-sm" style={{ color: collaborator.color }}>
-                {collaborator.name[0]}
-              </AvatarFallback>
+              <AvatarFallback>{collaborator.name[0]}</AvatarFallback>
             </Avatar>
           </TooltipTrigger>
           <TooltipContent>

@@ -4,7 +4,7 @@ import { setupWSConnection } from 'y-websocket/bin/utils';
 
 const wss = new WebSocketServer({ port: 1234 });
 
-// Track active connections and rooms
+// Track active connections and rooms with timestamps
 const rooms = new Map();
 const connections = new Map();
 const docs = new Map();
@@ -21,21 +21,67 @@ const logRoomStatus = (roomName) => {
   console.log('==================\n');
 };
 
+// More aggressive cleanup interval (every 5 seconds)
+const cleanup = setInterval(() => {
+  const now = Date.now();
+  
+  // Cleanup stale connections
+  connections.forEach((connection, ws) => {
+    if (!ws.isAlive) {
+      ws.terminate();
+      connections.delete(ws);
+      return;
+    }
+    
+    // Check if connection is too old (> 30 seconds without activity)
+    if (now - connection.timestamp > 30000) {
+      ws.terminate();
+      connections.delete(ws);
+      return;
+    }
+    
+    ws.isAlive = false;
+    ws.ping();
+  });
+
+  // Cleanup empty rooms and their docs
+  rooms.forEach((connections, roomName) => {
+    if (connections.size === 0) {
+      const doc = docs.get(roomName);
+      if (doc) {
+        doc.destroy();
+        docs.delete(roomName);
+      }
+      rooms.delete(roomName);
+    }
+  });
+}, 5000);
+
 wss.on('connection', (ws, req) => {
   const connectionId = Math.random().toString(36).substr(2, 9);
   const url = new URL(req.url, 'ws://localhost:1234');
   const roomName = url.pathname.slice(1);
   
-  console.log('\n[New Connection]', {
-    connectionId,
-    roomName,
-    totalConnections: wss.clients.size
-  });
-
   connections.set(ws, {
     id: connectionId,
     room: roomName,
     timestamp: Date.now()
+  });
+
+  ws.isAlive = true;
+  ws.on('pong', () => {
+    ws.isAlive = true;
+    // Update timestamp on activity
+    const connection = connections.get(ws);
+    if (connection) {
+      connection.timestamp = Date.now();
+    }
+  });
+
+  console.log('\n[New Connection]', {
+    connectionId,
+    roomName,
+    totalConnections: wss.clients.size
   });
 
   if (!rooms.has(roomName)) {
@@ -57,23 +103,33 @@ wss.on('connection', (ws, req) => {
     if (connection) {
       const { id, room } = connection;
       
-      // Force cleanup of Y.js awareness
-      const doc = docs.get(room);
-      if (doc) {
-        doc.awareness?.removeStates([id]);
-      }
-
-      // Remove from room and connections
+      // Improved cleanup sequence
       const roomSet = rooms.get(room);
-      if (roomSet) {
-        roomSet.delete(id);
-        if (roomSet.size === 0) {
+      const doc = docs.get(room);
+      
+      if (doc) {
+        // Clean up awareness states immediately
+        doc.awareness?.removeStates([id]);
+        
+        // Only destroy doc if this was the last connection
+        if (roomSet?.size === 1) {
+          doc.destroy();
+          docs.delete(room);
           rooms.delete(room);
-          docs.delete(room); // Also cleanup the Y.js doc
         }
       }
+
+      // Remove from room set
+      if (roomSet) {
+        roomSet.delete(id);
+      }
+      
+      // Clear connection
       connections.delete(ws);
     }
+    
+    // Ensure socket is properly terminated
+    ws.terminate();
   });
 
   ws.on('error', (error) => {
@@ -82,23 +138,18 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-// Periodic cleanup of stale connections
-setInterval(() => {
-  const now = Date.now();
-  connections.forEach((connection, ws) => {
-    // Check if connection is still alive
-    if (ws.readyState === ws.CLOSED) {
-      ws.terminate();
-    }
-  });
-}, 30000); // Run every 30 seconds
-
-// Handle server shutdown gracefully
+// Cleanup on server shutdown
 process.on('SIGINT', () => {
+  clearInterval(cleanup);
   console.log('Shutting down WebSocket server...');
   wss.clients.forEach((client) => {
-    client.close();
+    client.terminate();
   });
+  // Cleanup all docs
+  docs.forEach(doc => doc.destroy());
+  docs.clear();
+  rooms.clear();
+  connections.clear();
   process.exit(0);
 });
 
