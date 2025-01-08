@@ -23,6 +23,7 @@ export const useEditorConfig = (
       extensions: [
         StarterKit.configure({
           history: false,
+          heading: false,
         }),
         Heading.configure({
           levels: [1, 2, 3, 4],

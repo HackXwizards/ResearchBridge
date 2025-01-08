@@ -1,54 +1,84 @@
-import { useRef, useEffect, useState } from 'react';
-import * as Y from 'yjs';
+import { useState, useEffect, useRef } from 'react';
 import { WebsocketProvider } from 'y-websocket';
-import { Awareness } from 'y-protocols/awareness';
-import { CollaboratorInfo } from '../types';
+import { CollaboratorInfo } from '@/types';
+import { getNextDummyUser } from '@/utils/dummyUsers';
 
-export const useCollaboration = (documentId: string, currentUser: CollaboratorInfo) => {
-  const ydocRef = useRef(new Y.Doc());
-  const providerRef = useRef(
-    new WebsocketProvider('ws://localhost:1234', documentId, ydocRef.current, {
-      connect: true,
-      awareness: new Awareness(ydocRef.current),
-      maxBackoffTime: 10000,
-      disableBc: true,
-    })
-  );
+export const useCollaborators = (provider: WebsocketProvider) => {
   const [collaborators, setCollaborators] = useState<CollaboratorInfo[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const localUserRef = useRef(getNextDummyUser());
+  const tabIdRef = useRef(`tab-${Math.random().toString(36).substr(2, 9)}`);
 
   useEffect(() => {
-    const provider = providerRef.current;
-    provider.awareness.setLocalState({
-      user: {
-        name: currentUser.name,
-        fullName: currentUser.fullName,
-        color: currentUser.color,
-        role: currentUser.role,
-      },
-    });
+    if (!provider.awareness) return;
+
+    const updateConnectionStatus = ({ status }: { status: string }) => {
+      setIsConnected(status === 'connected');
+    };
 
     const updateCollaborators = () => {
-      const states = Array.from(provider.awareness.getStates().values());
-      const activeUsers = states
-        .filter((state) => state?.user)
-        .map((state) => ({
-          name: state.user.name,
-          fullName: state.user.fullName,
-          color: state.user.color,
-          avatar: state.user.avatar,
-          role: state.user.role,
-        }));
-      setCollaborators(activeUsers);
+      if (!provider.wsconnected) return;
+
+      const states = Array.from(provider.awareness.getStates());
+      const currentClientId = provider.awareness.clientID;
+      
+      const userConnections = new Map<string, CollaboratorInfo>();
+
+      states.forEach(([clientId, state]) => {
+        if (state?.user) {
+          const { name, tabId, ...userData } = state.user;
+          const existing = userConnections.get(name);
+          
+          if (!existing || clientId > existing.clientId) {
+            userConnections.set(name, {
+              ...userData,
+              name,
+              tabId,
+              clientId
+            });
+          }
+        }
+      });
+
+      userConnections.delete(localUserRef.current.name);
+
+      userConnections.set(localUserRef.current.name, {
+        ...localUserRef.current,
+        tabId: tabIdRef.current,
+        clientId: currentClientId,
+      });
+
+      setCollaborators(Array.from(userConnections.values()));
     };
 
-    updateCollaborators();
+    const cleanup = () => {
+      provider.awareness.setLocalState(null);
+    };
+
+    provider.awareness.setLocalState({
+      user: {
+        ...localUserRef.current,
+        tabId: tabIdRef.current,
+        clientId: provider.awareness.clientID,
+      }
+    });
+
     provider.awareness.on('change', updateCollaborators);
+    provider.on('status', updateConnectionStatus);
+
+    updateConnectionStatus({ status: provider.wsconnected ? 'connected' : 'disconnected' });
+    updateCollaborators();
 
     return () => {
+      cleanup();
       provider.awareness.off('change', updateCollaborators);
-      provider.disconnect();
+      provider.off('status', updateConnectionStatus);
     };
-  }, [currentUser]);
+  }, [provider]);
 
-  return { ydocRef, providerRef, collaborators };
+  return {
+    collaborators,
+    localUser: localUserRef.current,
+    isConnected
+  };
 };
