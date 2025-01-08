@@ -14,6 +14,169 @@ body {
   @apply bg-gradient-to-b from-[#f8f8f5] to-white min-h-screen;
 }
 
+.prose img {
+  display: block;
+  height: auto;
+  margin: 1.5rem 0;
+  max-width: 20%;
+}
+
+.prose img.ProseMirror-selectednode {
+  outline: 3px solid #6A00F5;
+}
+
+.prose > *:first-child {
+  margin-top: 0;
+}
+
+
+/* ... existing styles ... */
+
+/* Table styles */
+.prose table {
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.prose table td,
+.prose table th {
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 6px 8px;
+  position: relative;
+  vertical-align: top;
+}
+
+.prose table th {
+  background-color: #f9fafb;
+  font-weight: bold;
+  text-align: left;
+}
+
+.prose table .selectedCell:after {
+  background: rgba(200, 200, 200, 0.4);
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.prose table .column-resize-handle {
+  background-color: #6A00F5;
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+}
+
+.tableWrapper {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.resize-cursor {
+  cursor: col-resize;
+}
+
+
+
+/* Code block styles */
+.prose pre {
+  background: #1a1a1a;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-family: 'JetBrainsMono', monospace;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+}
+
+.prose pre code {
+  background: none;
+  color: inherit;
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+/* Syntax highlighting */
+.prose pre .hljs-comment,
+.prose pre .hljs-quote {
+  color: #616161;
+}
+
+.prose pre .hljs-variable,
+.prose pre .hljs-template-variable,
+.prose pre .hljs-attribute,
+.prose pre .hljs-tag,
+.prose pre .hljs-regexp,
+.prose pre .hljs-link,
+.prose pre .hljs-name,
+.prose pre .hljs-selector-id,
+.prose pre .hljs-selector-class {
+  color: #f98181;
+}
+
+.prose pre .hljs-number,
+.prose pre .hljs-meta,
+.prose pre .hljs-built_in,
+.prose pre .hljs-builtin-name,
+.prose pre .hljs-literal,
+.prose pre .hljs-type,
+.prose pre .hljs-params {
+  color: #fbbc88;
+}
+
+.prose pre .hljs-string,
+.prose pre .hljs-symbol,
+.prose pre .hljs-bullet {
+  color: #b9f18d;
+}
+
+.prose pre .hljs-title,
+.prose pre .hljs-section {
+  color: #faf594;
+}
+
+.prose pre .hljs-keyword,
+.prose pre .hljs-selector-tag {
+  color: #70cff8;
+}
+
+.prose pre .hljs-emphasis {
+  font-style: italic;
+}
+
+.prose pre .hljs-strong {
+  font-weight: 700;
+}
+/* ... existing styles ... */
+
+/* List styles */
+/* List styles */
+.prose ul {
+  list-style-type: disc;  /* This adds the dots */
+  padding-left: 1.5rem;   /* Adds space for the bullets */
+  margin: 1.25rem 1rem 1.25rem 0.4rem;
+}
+
+.prose ul li {
+  list-style-position: outside;  /* Ensures bullets are outside the text block */
+}
+
+.prose ul li p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
 
 
 .citation {
@@ -58,6 +221,8 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --a4-width: 794px;  /* 210mm at 96 DPI */
+    --a4-height: 1123px; /* 297mm at 96 DPI */
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -93,4 +258,81 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Add A4 page styling */
+.a4-page {
+  width: var(--a4-width);
+  min-height: var(--a4-height);
+  margin: 0 auto;
+  padding: 50px;
+  background: rgb(255, 255, 255);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.editor-container {
+  max-height: calc(100vh - 120px); /* Adjust based on your toolbar height */
+  overflow-y: auto;
+  background: #f5f5f5;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.toolbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: white;
+}
+
+/* Content styling */
+.prose {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.prose h1 {
+  font-size: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Image styling */
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+}
+
+/* Table styling */
+.prose table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+}
+
+.prose table td,
+.prose table th {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+}
+
+/* List styling */
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.prose ul li {
+  list-style-type: disc;
+  margin: 0.25rem 0;
 }

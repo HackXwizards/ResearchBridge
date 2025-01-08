@@ -11,7 +11,23 @@ import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { Citation } from "../extensions/CitationExtension";
 import {CollaboratorInfo} from '../types'
+import Image from "@tiptap/extension-image";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import BulletList from '@tiptap/extension-bullet-list';
+import ListItem from '@tiptap/extension-list-item';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { createLowlight } from 'lowlight';
+import css from 'highlight.js/lib/languages/css';
+import js from 'highlight.js/lib/languages/javascript';
+import ts from 'highlight.js/lib/languages/typescript';
+import html from 'highlight.js/lib/languages/xml';
 
+// Create lowlight instance with specific languages
+const lowlight = createLowlight();
+lowlight.register('html', html);
+lowlight.register('css', css);
+lowlight.register('js', js);
+lowlight.register('ts', ts);
 
 export const useEditorConfig = (
   ydoc: Y.Doc, 
@@ -23,16 +39,36 @@ export const useEditorConfig = (
       extensions: [
         StarterKit.configure({
           history: false,
+          heading: false,
+          bulletList: false,
+          listItem: false,
+          dropcursor: false,
+          codeBlock: false,
         }),
         Heading.configure({
           levels: [1, 2, 3, 4],
         }),
         Table.configure({
           resizable: true,
+          HTMLAttributes: {
+            class: 'prose-table',
+          },
         }),
-        TableRow,
-        TableCell,
-        TableHeader,
+        TableRow.configure({
+          HTMLAttributes: {
+            class: 'prose-tr',
+          },
+        }),
+        TableHeader.configure({
+          HTMLAttributes: {
+            class: 'prose-th',
+          },
+        }),
+        TableCell.configure({
+          HTMLAttributes: {
+            class: 'prose-td',
+          },
+        }),
         Collaboration.configure({
           document: ydoc,
           fragmentSize: 800,
@@ -53,10 +89,32 @@ export const useEditorConfig = (
             class: "citation-text",
           },
         }),
+        Image.configure({
+          HTMLAttributes: {
+            class: 'editor-image',
+          },
+        }),
+        BulletList.configure({
+          HTMLAttributes: {
+            class: 'prose-list-disc list-disc',
+          },
+        }),
+        ListItem.configure({
+          HTMLAttributes: {
+            class: 'prose-li',
+          },
+        }),
+        Dropcursor,
+        CodeBlockLowlight.configure({
+          lowlight,
+          HTMLAttributes: {
+            class: 'prose-pre',
+          },
+        }),
       ],
       editorProps: {
         attributes: {
-          class: "prose prose-lg max-w-none focus:outline-none min-h-[800px] px-8 py-6",
+          class: "prose prose-sm max-w-none focus:outline-none",
         },
       },
       content: `

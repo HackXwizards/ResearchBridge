@@ -1,4 +1,10 @@
-import { BookOpen, FileText, Image, Table as TableIcon } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  Image,
+  Table as TableIcon,
+  List,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -7,6 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Editor } from "@tiptap/react";
 import { useState } from "react";
+import { Code } from "lucide-react";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -33,38 +40,24 @@ export const Toolbar = ({
     }
   };
 
+  const handleImageClick = () => {
+    const url = window.prompt("Enter image URL:");
+    if (url && editor) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const addTable = () => {
+    editor
+      ?.chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .run();
+  };
+
   return (
     <div className="border-b p-2 flex justify-between items-center bg-gray-50">
       <div className="flex gap-2">
-        {/* Document Structure */}
-        <div className="flex items-center space-x-1 border-r pr-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            className={
-              editor?.isActive("heading", { level: 1 }) ? "bg-gray-200" : ""
-            }
-          >
-            <FileText className="w-4 h-4 mr-1" />
-            Title
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            className={
-              editor?.isActive("heading", { level: 2 }) ? "bg-gray-200" : ""
-            }
-          >
-            Section
-          </Button>
-        </div>
-
         {/* Formatting */}
         <div className="flex items-center space-x-1 border-r pr-2">
           <Button
@@ -89,7 +82,11 @@ export const Toolbar = ({
         <div className="flex items-center space-x-1 border-r pr-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={onShowReferenceManager}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onShowReferenceManager}
+              >
                 <BookOpen className="w-4 h-4 mr-1" />
                 Add Citation
               </Button>
@@ -97,14 +94,94 @@ export const Toolbar = ({
             <TooltipContent>Insert citation from library</TooltipContent>
           </Tooltip>
 
-          <Button variant="ghost" size="sm">
-            <TableIcon className="w-4 h-4 mr-1" />
-            Table
-          </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={handleImageClick}>
             <Image className="w-4 h-4 mr-1" />
             Figure
           </Button>
+        </div>
+
+        <div className="flex items-center space-x-1 border-r pr-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
+            className={editor?.isActive("codeBlock") ? "bg-gray-200" : ""}
+          >
+            <Code className="w-4 h-4 mr-1" />
+            Code Block
+          </Button>
+        </div>
+
+        {/* Table Controls */}
+        <div className="flex items-center space-x-1 border-r pr-2">
+          <Button variant="ghost" size="sm" onClick={addTable}>
+            <TableIcon className="w-4 h-4 mr-1" />
+            Insert Table
+          </Button>
+
+          {editor?.isActive("table") && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+              >
+                Add Column
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+              >
+                Add Row
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().deleteTable().run()}
+              >
+                Delete Table
+              </Button>
+            </>
+          )}
+        </div>
+
+        {/* List Controls */}
+        <div className="flex items-center space-x-1 border-r pr-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+            className={editor?.isActive("bulletList") ? "bg-gray-200" : ""}
+          >
+            <List className="w-4 h-4 mr-1" />
+            Bullet List
+          </Button>
+
+          {editor?.isActive("listItem") && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  editor?.chain().focus().sinkListItem("listItem").run()
+                }
+                disabled={!editor?.can().sinkListItem("listItem")}
+              >
+                Indent
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  editor?.chain().focus().liftListItem("listItem").run()
+                }
+                disabled={!editor?.can().liftListItem("listItem")}
+              >
+                Outdent
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="flex items-center space-x-1 border-r pr-2">
@@ -115,16 +192,12 @@ export const Toolbar = ({
             disabled={isExporting}
           >
             {isExporting ? "Exporting..." : "Export PDF"}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onExport("latex")}
-        >
-          Export LaTeX
-        </Button>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onExport("latex")}>
+            Export LaTeX
+          </Button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };

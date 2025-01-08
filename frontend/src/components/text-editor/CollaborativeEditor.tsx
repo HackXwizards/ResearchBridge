@@ -2,19 +2,11 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 
 import { Citation } from "../../extensions/CitationExtension";
-// import {Abstract} from '../extensions/AbstractExtension'
 import { CitationService } from "../../services/CitationService";
-import { ExportService } from "../../services/ExportService";
 import { ReferenceManager } from "./ReferenceManager";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { Toolbar } from "./Toolbar";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -22,6 +14,7 @@ import debounce from "lodash/debounce";
 import { Awareness } from "y-protocols/awareness";
 import { useEditorConfig } from "@/hooks/useEditorConfig";
 import { useExport } from "@/hooks/useExport";
+import { CollaboratorsList } from "./CollaboratorsList";
 
 interface CollaboratorInfo {
   name: string;
@@ -161,12 +154,13 @@ const CollaborativeEditor = ({
         fullName: currentUser.fullName,
         color: currentUser.color,
         role: currentUser.role,
+        // Add a unique session ID to distinguish between tabs
+        sessionId: Math.random().toString(36).substr(2, 9),
       },
     });
 
     const updateCollaborators = () => {
       const states = Array.from(provider.awareness.getStates().values());
-      console.log("Current awareness states:", states); // Debug log
       const activeUsers = states
         .filter((state) => state?.user)
         .map((state) => ({
@@ -175,19 +169,47 @@ const CollaborativeEditor = ({
           color: state.user.color,
           avatar: state.user.avatar,
           role: state.user.role,
+          sessionId: state.user.sessionId,
         }));
-      console.log("Active users:", activeUsers); // Debug log
-      setCollaborators(activeUsers);
+
+      // Remove duplicates based on sessionId
+      const uniqueUsers = Array.from(
+        new Map(activeUsers.map(user => [user.sessionId, user])).values()
+      );
+      
+      setCollaborators(uniqueUsers);
     };
 
     // Update collaborators immediately and on changes
     updateCollaborators();
     provider.awareness.on("change", updateCollaborators);
+    // Handle tab/window close or visibility change
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        provider.awareness.setLocalState(null);
+      } else {
+        // Restore state when tab becomes visible again
+        provider.awareness.setLocalState({
+          user: {
+            name: currentUser.name,
+            fullName: currentUser.fullName,
+            color: currentUser.color,
+            role: currentUser.role,
+            sessionId: Math.random().toString(36).substr(2, 9),
+          },
+        });
+      }
+    };
 
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup function
     return () => {
       provider.awareness.off("change", updateCollaborators);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      provider.awareness.setLocalState(null);
     };
-  }, [currentUser]); // Add currentUser as dependency
+  }, [currentUser]);
 
   // Add content size monitoring and limiting
   const MAX_CONTENT_SIZE = 1000000; // 1MB limit
@@ -212,19 +234,7 @@ const CollaborativeEditor = ({
   }, [editor, handleContentUpdate]);
 
   // Add image size limits and optimization
-  const handleImageUpload = useCallback(async (file: File) => {
-    const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
-
-    if (file.size > MAX_IMAGE_SIZE) {
-      // Compress image before inserting
-      try {
-        const compressedFile = await compressImage(file);
-        // Insert compressed image
-      } catch (error) {
-        console.error("Failed to compress image:", error);
-      }
-    }
-  }, []);
+ 
 
   // Add this effect to configure awareness settings
   useEffect(() => {
@@ -239,40 +249,25 @@ const CollaborativeEditor = ({
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
-      <Toolbar
-        editor={editor}
-        onShowReferenceManager={() => setShowReferenceManager(true)}
-        onExport={handleExport}
-      />
-      <div className="border-b p-2 flex justify-between items-center bg-gray-50">
-        <div className="flex -space-x-2">
-          {collaborators.map((collaborator, index) => (
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <Avatar
-                  className="w-8 h-8 border-2 border-white cursor-pointer ring-2 ring-offset-2"
-                  style={{
-                    backgroundColor: collaborator.color + "20",
-                    borderColor: collaborator.color,
-                  }}
-                >
-                  <AvatarFallback>{collaborator.name[0]}</AvatarFallback>
-                </Avatar>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="text-sm">
-                  <p className="font-medium">{collaborator.fullName}</p>
-                  <p className="text-xs text-gray-500">{collaborator.role}</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          ))}
+      <div className="toolbar-container">
+        <Toolbar
+          editor={editor}
+          onShowReferenceManager={() => setShowReferenceManager(true)}
+          onExport={handleExport}
+        />
+        <div className="border-b p-2 flex justify-between items-center bg-gray-50">
+          <CollaboratorsList collaborators={collaborators} />
         </div>
       </div>
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-y-auto bg-white">
-        <EditorContent editor={editor} />
+      <div className="editor-container">
+        <div className="a4-page">
+          <EditorContent 
+            editor={editor} 
+            className="prose prose-sm max-w-none focus:outline-none" 
+          />
+        </div>
       </div>
 
       {/* Reference Manager Modal */}
