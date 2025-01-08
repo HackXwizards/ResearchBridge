@@ -39,6 +39,11 @@ export const useEditorConfig = (
       extensions: [
         StarterKit.configure({
           history: false,
+          heading: false,
+          bulletList: false,
+          listItem: false,
+          dropcursor: false,
+          codeBlock: false,
         }),
         Heading.configure({
           levels: [1, 2, 3, 4],

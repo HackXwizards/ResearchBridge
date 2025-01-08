@@ -29,7 +29,7 @@ const CollaborationPage = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-10 mt-20 overflow-hidden">
+    <div className="container mx-auto p-10 mt-20 ">
       <Card className="border rounded-lg shadow-lg">
         <div className="grid grid-cols-[300px_1fr] h-[80vh]">
           {/* Left Sidebar */}
@@ -76,7 +76,7 @@ const CollaborationPage = () => {
           </div>
 
           {/* Editor Area */}
-          <div className="p-4 flex flex-col h-full">
+          <div className="p-4 flex flex-col h-full w-full">
             <div className="border-b pb-2 mb-4">
               <input
                 type="text"
