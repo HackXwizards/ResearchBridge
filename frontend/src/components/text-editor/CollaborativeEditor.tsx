@@ -4,17 +4,10 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { Citation } from "../../extensions/CitationExtension";
 // import {Abstract} from '../extensions/AbstractExtension'
 import { CitationService } from "../../services/CitationService";
-import { ExportService } from "../../services/ExportService";
 import { ReferenceManager } from "./ReferenceManager";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { Toolbar } from "./Toolbar";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -162,12 +155,13 @@ const CollaborativeEditor = ({
         fullName: currentUser.fullName,
         color: currentUser.color,
         role: currentUser.role,
+        // Add a unique session ID to distinguish between tabs
+        sessionId: Math.random().toString(36).substr(2, 9),
       },
     });
 
     const updateCollaborators = () => {
       const states = Array.from(provider.awareness.getStates().values());
-      console.log("Current awareness states:", states); // Debug log
       const activeUsers = states
         .filter((state) => state?.user)
         .map((state) => ({
@@ -176,19 +170,47 @@ const CollaborativeEditor = ({
           color: state.user.color,
           avatar: state.user.avatar,
           role: state.user.role,
+          sessionId: state.user.sessionId,
         }));
-      console.log("Active users:", activeUsers); // Debug log
-      setCollaborators(activeUsers);
+
+      // Remove duplicates based on sessionId
+      const uniqueUsers = Array.from(
+        new Map(activeUsers.map(user => [user.sessionId, user])).values()
+      );
+      
+      setCollaborators(uniqueUsers);
     };
 
     // Update collaborators immediately and on changes
     updateCollaborators();
     provider.awareness.on("change", updateCollaborators);
+    // Handle tab/window close or visibility change
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        provider.awareness.setLocalState(null);
+      } else {
+        // Restore state when tab becomes visible again
+        provider.awareness.setLocalState({
+          user: {
+            name: currentUser.name,
+            fullName: currentUser.fullName,
+            color: currentUser.color,
+            role: currentUser.role,
+            sessionId: Math.random().toString(36).substr(2, 9),
+          },
+        });
+      }
+    };
 
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup function
     return () => {
       provider.awareness.off("change", updateCollaborators);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      provider.awareness.setLocalState(null);
     };
-  }, [currentUser]); // Add currentUser as dependency
+  }, [currentUser]);
 
   // Add content size monitoring and limiting
   const MAX_CONTENT_SIZE = 1000000; // 1MB limit
@@ -248,9 +270,13 @@ const CollaborativeEditor = ({
       <div className="border-b p-2 flex justify-between items-center bg-gray-50">
         <CollaboratorsList collaborators={collaborators} />
       </div>
+      
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-y-auto bg-white">
+      <div className="flex-1 overflow-y-auto bg-amber-50">
+        <div>
+          
+        </div>
         <EditorContent editor={editor} />
       </div>
 

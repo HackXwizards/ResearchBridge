@@ -1,37 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CollaborativeEditor from '@/components/text-editor/CollaborativeEditor';
-
-// Dummy researchers data for testing
-const dummyResearchers = {
-  current: {
-    name: "kk",
-    fullName: "Dr. Anuj Kumar",
-    color: "#4f46e5",
-    avatar: "/avatars/anuj.jpg",
-    role: "Lead Researcher"
-  },
-  collaborators: [
-    {
-      name: "Sarah",
-      fullName: "Dr. Sarah Johnson",
-      color: "#16a34a",
-      avatar: "/avatars/sarah.jpg",
-      role: "Co-Researcher"
-    },
-    {
-      name: "Mike",
-      fullName: "Prof. Michael Chen",
-      color: "#dc2626",
-      avatar: "/avatars/mike.jpg",
-      role: "Research Advisor"
-    }
-  ]
-};
+import { getNextDummyUser } from '@/utils/dummyUsers';
 
 const CollaborationPage = () => {
   const [view, setView] = useState<'personal' | 'shared' | 'organization'>('personal');
+  const [currentUser, setCurrentUser] = useState(() => getNextDummyUser());
+
+  useEffect(() => {
+    // Only update user if there isn't one already stored
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'currentUser' && e.newValue) {
+        setCurrentUser(JSON.parse(e.newValue));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   return (
     <div className="container mx-auto p-10 mt-20 overflow-hidden">
@@ -92,7 +87,7 @@ const CollaborationPage = () => {
 
             <CollaborativeEditor 
               documentId="research-paper-1"
-              currentUser={dummyResearchers.current}
+              currentUser={currentUser}
             />
           </div>
         </div>
