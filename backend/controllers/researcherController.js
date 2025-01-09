@@ -82,24 +82,24 @@ export const createResearch = async (req, res) => {
 export const searchResearch = async (req, res) => {
     const session = getSession();
     try {
-      const { query, tags, year } = req.query;
+      const { query, field, year } = req.query;
   
-      console.log("Query Parameters:", { query, tags, year }); // Debugging
-  
+     
       let filterConditions = [];
       let params = {};
   
       if (query) {
-        filterConditions.push(`(r.title CONTAINS $query OR r.description CONTAINS $query)`);
+        filterConditions.push(`(toLower(r.title) CONTAINS toLower($query) OR toLower(r.description) CONTAINS toLower($query))`);
         params.query = query;
       }
-      if (tags) {
-        filterConditions.push(`ANY(tag IN r.tags WHERE tag = $tags)`);
-        params.tags = tags;
+      if (field) {
+        filterConditions.push(`ANY(tag IN r.tags WHERE toLower(tag) = toLower($field))`);
+        params.field = field;
       }
-      if (year) {
+      if (year && year !== '') {
+        // Convert year to integer for comparison
         filterConditions.push(`r.year = $year`);
-        params.year = parseInt(year, 10); // Ensure year is an integer
+        params.year = parseInt(year, 10);
       }
   
       const filterQuery = filterConditions.length > 0 ? `WHERE ${filterConditions.join(" AND ")}` : "";
@@ -109,11 +109,12 @@ export const searchResearch = async (req, res) => {
         RETURN r { .id, .title, .authors, .journal, .year, .tags, .description } AS research
       `;
   
-      console.log("Constructed Query:", finalQuery); // Debugging
-      console.log("Query Parameters for Cypher:", params); // Debugging
   
       const result = await session.run(finalQuery, params);
-      const researchList = result.records.map(record => record.get("research"));
+      const researchList = result.records.map(record => {
+        const research = record.get("research");
+        return research;
+      });
   
       res.status(200).json(researchList);
     } catch (error) {

@@ -1,41 +1,34 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { SearchBarProps } from '@/hooks/search.types';
+import { useState } from 'react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+}
 
-  const handleSubmit = (e: React.FormEvent): void => {
+const SearchBar = ({ onSearch }: SearchBarProps) => {
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchQuery);
+    onSearch(query);
   };
 
   return (
-    <motion.form 
-      onSubmit={handleSubmit} 
-      className="flex gap-2"
-      initial={{ scale: 0.95 }}
-      animate={{ scale: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <motion.input
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <Input
         type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Search researchers, publications..."
-        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        whileFocus={{ scale: 1.01 }}
-        transition={{ duration: 0.2 }}
+        placeholder="Search publications..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="flex-1"
       />
-      <motion.button
-        type="submit"
-        className="px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
+      <Button type="submit">
+        <Search className="h-4 w-4 mr-2" />
         Search
-      </motion.button>
-    </motion.form>
+      </Button>
+    </form>
   );
 };
 

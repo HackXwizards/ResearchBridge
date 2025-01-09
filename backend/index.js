@@ -1,18 +1,24 @@
 import express from "express";
 import bodyParser from "body-parser";
 import researchRoutes from "./routes/researcherRoute.js";
+import cors from 'cors';
 
 const app = express();
 const PORT = 5000;
 
-app.use(bodyParser.json()); // Parse JSON bodies
-app.use("/api/research", researchRoutes); // Use research routes
+// CORS configuration should come before routes
+app.use(cors({
+  origin: 'http://localhost:5173', // Remove trailing slash
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
+}));
 
-// Default route
-app.get("/", (req, res) => {
-  res.send("Welcome to the Neo4j Research API!");
-});
+app.use(bodyParser.json());
+app.use("/api/research", researchRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
+  
