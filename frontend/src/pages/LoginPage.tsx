@@ -15,9 +15,9 @@ const LoginPage = () => {
         opacity: 1,
         transition: {
           when: "beforeChildren",
-          staggerChildren: 0.2,
+          staggerChildren: 0.1,
           ease: [0.25, 0.1, 0.25, 1],
-          duration: 0.8,
+          duration: 0.9,
         },
       },
     },
@@ -30,7 +30,7 @@ const LoginPage = () => {
         opacity: 1,
         y: 0,
         transition: {
-          duration: 0.6,
+          duration: 0.4,
           ease: [0.25, 0.1, 0.25, 1],
         },
       },
@@ -42,13 +42,13 @@ const LoginPage = () => {
         scale: 1,
         transition: {
           type: "spring",
-          stiffness: 100,
-          damping: 15,
+          stiffness: 90,
+          damping: 17,
         },
       },
       hover: {
         scale: 1.05,
-        transition: { duration: 0.2, ease: "easeInOut" },
+        transition: { duration: 0.25, ease: "easeInOut" },
       },
     },
   };
@@ -56,7 +56,7 @@ const LoginPage = () => {
   const [ref, inView] = useInView({
     threshold: 0.2,
     triggerOnce: true,
-  });
+  }); 
 
   return (
     <section
@@ -88,7 +88,6 @@ const LoginPage = () => {
                 variants={animations.container}
                 className="space-y-4"
               >
-                <motion.div variants={animations.field}>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     type="email"
@@ -96,8 +95,6 @@ const LoginPage = () => {
                     placeholder="Enter your email"
                     className="mt-1"
                   />
-                </motion.div>
-                <motion.div variants={animations.field}>
                   <Label htmlFor="password">Password</Label>
                   <Input
                     type="password"
@@ -105,7 +102,6 @@ const LoginPage = () => {
                     placeholder="Enter your password"
                     className="mt-1"
                   />
-                </motion.div>
                 <motion.div
                   variants={animations.button}
                   whileHover="hover"
