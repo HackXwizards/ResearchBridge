@@ -43,7 +43,7 @@ const CollaborationPage = () => {
               />
             </div>
 
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto hidden md:block">
               <CollaborativeEditor 
                 documentId="research-paper-1"
                 currentUser={currentUser}
