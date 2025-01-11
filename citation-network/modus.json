@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "connections": {
+    "gemini-api": {
+      "type": "http",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1/",
+      "headers": {
+        "Authorization": "Bearer {{GEMINI_API_KEY}}"
+      }
+    }
+  }
+}
