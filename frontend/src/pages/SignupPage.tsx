@@ -1,12 +1,30 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+
+interface SignupResponse {
+  token: string;
+  user: {
+    name: string;
+    email: string;
+  };
+}
 
 const SignupPage = () => {
-  // const shouldReduceMotion = useReducedMotion();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
 
   const animations = {
     container: {
@@ -58,6 +76,36 @@ const SignupPage = () => {
     triggerOnce: true,
   });
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post<SignupResponse>(
+        "http://localhost:5000/api/auth/signup",
+        formData
+      );
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      toast.success("Account created successfully!");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section
       ref={ref}
@@ -87,38 +135,57 @@ const SignupPage = () => {
               <motion.form
                 variants={animations.container}
                 className="space-y-4"
+                onSubmit={handleSubmit}
               >
+                <div>
                   <Label htmlFor="name">Name</Label>
                   <Input
                     type="text"
                     id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     placeholder="Enter your name"
                     className="mt-1"
+                    required
                   />
+                </div>
+                <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     type="email"
                     id="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     placeholder="Enter your email"
                     className="mt-1"
+                    required
                   />
+                </div>
+                <div>
                   <Label htmlFor="password">Password</Label>
                   <Input
                     type="password"
                     id="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
                     placeholder="Create a password"
                     className="mt-1"
+                    required
+                    minLength={6}
                   />
+                </div>
                 <motion.div
                   variants={animations.button}
                   whileHover="hover"
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
+                    type="submit"
                     size="lg"
                     className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={isLoading}
                   >
-                    Sign Up
+                    {isLoading ? "Creating Account..." : "Sign Up"}
                   </Button>
                 </motion.div>
               </motion.form>

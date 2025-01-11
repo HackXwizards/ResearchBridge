@@ -51,6 +51,7 @@
     "react-intersection-observer": "^9.14.1",
     "react-resizable-panels": "^2.1.7",
     "react-router-dom": "^7.1.1",
+    "sonner": "^1.7.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.0.4",
