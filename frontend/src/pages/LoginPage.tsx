@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 interface LoginResponse {
   token: string;
@@ -18,6 +19,7 @@ interface LoginResponse {
 }
 
 const LoginPage = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
   const [isLoading, setIsLoading] = useState(false);
@@ -95,7 +97,7 @@ const LoginPage = () => {
       );
 
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      login(response.data.user);
       
       toast.success("Login successful!");
       navigate("/");

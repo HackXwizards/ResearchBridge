@@ -11,10 +11,11 @@ import CollaborationPage from "./pages/CollaborationPage";
 import PublicationDetailsPage from "./pages/PublicationDetailsPage";
 import PublicationForm from "./pages/PublicationForm";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from './contexts/AuthContext';
 
 const App = () => {
   return (
-    <>
+    <AuthProvider>
       <Toaster position="top-right" reverseOrder={false} />
       <TooltipProvider>
         <BrowserRouter>
@@ -35,7 +36,7 @@ const App = () => {
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </>
+    </AuthProvider>
   );
 };
 

@@ -8,7 +8,6 @@ require (
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/generative-ai-go v0.19.0
-	github.com/hypermodeinc/modus/sdk/go v0.16.1
 	github.com/joho/godotenv v1.5.1
 	github.com/serpapi/google-search-results-golang v0.0.0-20240325113416-ec93f510648e
 	google.golang.org/api v0.186.0
