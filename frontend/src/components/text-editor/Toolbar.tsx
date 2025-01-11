@@ -1,9 +1,9 @@
 import {
   BookOpen,
-  FileText,
   Image,
   Table as TableIcon,
   List,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +17,15 @@ import { Code } from "lucide-react";
 
 interface ToolbarProps {
   editor: Editor | null;
-  onShowReferenceManager: () => void;
-  onExport: (format: "pdf" | "latex") => Promise<void>;
+  onShowResearchAssistant: () => void;
+  onExport: () => void;
 }
 
-export const Toolbar = ({
+export function Toolbar({
   editor,
-  onShowReferenceManager,
+  onShowResearchAssistant,
   onExport,
-}: ToolbarProps) => {
+}: ToolbarProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportClick = async (format: "pdf" | "latex") => {
@@ -56,7 +56,7 @@ export const Toolbar = ({
   };
 
   return (
-    <div className="border-b p-2 flex justify-between items-center bg-gray-50">
+    <div className="border-b p-2 flex justify-between items-center bg-slate-50">
       <div className="flex gap-2">
         {/* Formatting */}
         <div className="flex items-center space-x-1 border-r pr-2">
@@ -85,7 +85,7 @@ export const Toolbar = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onShowReferenceManager}
+                onClick={onShowResearchAssistant}
               >
                 <BookOpen className="w-4 h-4 mr-1" />
                 Add Citation
@@ -197,7 +197,22 @@ export const Toolbar = ({
             Export LaTeX
           </Button>
         </div>
+
+        <div className="flex items-center space-x-1 border-r pr-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onShowResearchAssistant}
+              >
+                <Sparkles className="w-4 h-4 mr-1" />
+                Research Assistant
+              </Button>
+            </TooltipTrigger>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );
-};
+}

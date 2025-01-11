@@ -9,6 +9,6 @@
 build/
 
 # Ignore Go debuger and generated files
-__debug_bin*
+# __debug_bin*
 *_generated.go
 *.generated.go

@@ -1,42 +1,73 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"log"
+	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Get API key from environment variable
-	apiKey := os.Getenv("MODUS_GEMINI_API_KEY")
-	if apiKey == "" {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Get API keys from environment variables
+	geminiKey := os.Getenv("MODUS_GEMINI_API_KEY")
+	if geminiKey == "" {
 		log.Fatal("MODUS_GEMINI_API_KEY environment variable is required")
 	}
 
-	// Initialize the citation analyzer
-	analyzer, err := NewCitationAnalyzer(apiKey)
-	if err != nil {
-		log.Fatalf("Failed to create citation analyzer: %v", err)
-	}
-	defer analyzer.ModusClose()
-
-	// Example usage with a sample paper
-	ctx := context.Background()
-	paperContent := `In their groundbreaking work, Smith et al. (2020) demonstrated that neural networks can effectively process citation graphs. 
-	This builds upon the earlier findings of Johnson and Brown (2018) regarding network analysis in academic literature. 
-	Recent developments by Zhang (2022) have shown promising results in automated citation analysis.`
-	
-	citations, err := analyzer.ModusAnalyzePaper(ctx, paperContent)
-	if err != nil {
-		log.Fatalf("Failed to analyze paper: %v", err)
+	serpApiKey := os.Getenv("SERP_API_KEY")
+	if serpApiKey == "" {
+		log.Fatal("SERP_API_KEY environment variable is required")
 	}
 
-	// Pretty print the results
-	prettyJSON, err := json.MarshalIndent(citations, "", "    ")
-	if err != nil {
-		log.Fatalf("Failed to format results: %v", err)
+	// Initialize the service
+	if err := InitializeService(geminiKey, serpApiKey); err != nil {
+		log.Fatalf("Failed to initialize service: %v", err)
 	}
-	fmt.Printf("Found %d citations:\n%s\n", len(citations), string(prettyJSON))
+	defer Close()
+
+	// Set up HTTP server
+	r := gin.Default()
+
+	// Configure CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"POST", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
+	// Add analyze-research endpoint
+	r.POST("/analyze-research", func(c *gin.Context) {
+		var request struct {
+			Content string `json:"content"`
+		}
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		log.Printf("Analyzing research content: %s", request.Content)
+
+		insights, err := AnalyzeResearch(c.Request.Context(), request.Content)
+		if err != nil {
+			log.Printf("Error analyzing research: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, insights)
+	})
+
+	log.Printf("Starting server on :8080")
+	r.Run(":8080")
 }

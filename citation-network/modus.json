@@ -12,7 +12,36 @@
       "type": "http",
       "baseUrl": "https://generativelanguage.googleapis.com/v1/",
       "headers": {
-        "Authorization": "Bearer {{GEMINI_API_KEY}}"
+        "Authorization": "Bearer {{MODUS_GEMINI_API_KEY}}"
+      }
+    },
+    "scholar-api": {
+      "type": "http",
+      "baseUrl": "https://serpapi.com/",
+      "headers": {
+        "Authorization": "Bearer {{SERP_API_KEY}}"
+      }
+    }
+  },
+  "services": {
+    "research-assistant": {
+      "type": "class",
+      "class": "ResearchAssistant",
+      "constructor": {
+        "parameters": [
+          {
+            "name": "geminiKey",
+            "type": "string",
+            "source": "env",
+            "envVar": "MODUS_GEMINI_API_KEY"
+          },
+          {
+            "name": "scholarApiKey",
+            "type": "string",
+            "source": "env",
+            "envVar": "SERP_API_KEY"
+          }
+        ]
       }
     }
   }

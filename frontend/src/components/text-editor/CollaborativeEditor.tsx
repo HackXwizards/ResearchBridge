@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 
 import { Citation } from "../../extensions/CitationExtension";
 import { CitationService } from "../../services/CitationService";
-import { ReferenceManager } from "./ReferenceManager";
+import { ResearchAssistant } from "./ResearchAssistant";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 
@@ -45,8 +45,9 @@ const CollaborativeEditor = ({
   );
   const citationServiceRef = useRef(new CitationService());
 
-  const [showReferenceManager, setShowReferenceManager] = useState(false);
+  const [showResearchAssistant, setShowResearchAssistant] = useState(false);
   const [collaborators, setCollaborators] = useState<CollaboratorInfo[]>([]);
+  const [selectedText, setSelectedText] = useState<string>("");
 
   // Memoize the editor configuration
   const editorConfig = useEditorConfig(
@@ -75,7 +76,7 @@ const CollaborativeEditor = ({
         .run();
 
       citationServiceRef.current.addCitation(citation);
-      setShowReferenceManager(false);
+      setShowResearchAssistant(false);
     },
     [editor]
   );
@@ -174,9 +175,9 @@ const CollaborativeEditor = ({
 
       // Remove duplicates based on sessionId
       const uniqueUsers = Array.from(
-        new Map(activeUsers.map(user => [user.sessionId, user])).values()
+        new Map(activeUsers.map((user) => [user.sessionId, user])).values()
       );
-      
+
       setCollaborators(uniqueUsers);
     };
 
@@ -234,7 +235,6 @@ const CollaborativeEditor = ({
   }, [editor, handleContentUpdate]);
 
   // Add image size limits and optimization
- 
 
   // Add this effect to configure awareness settings
   useEffect(() => {
@@ -247,12 +247,26 @@ const CollaborativeEditor = ({
     }
   }, []);
 
+  // Add this function to handle text selection
+  const handleShowResearchAssistant = () => {
+    const selection = editor?.state.selection;
+    if (selection) {
+      const text = editor?.state.doc.textBetween(
+        selection.from,
+        selection.to,
+        " "
+      );
+      setSelectedText(text || "");
+    }
+    setShowResearchAssistant(true);
+  };
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
       <div className="toolbar-container">
         <Toolbar
           editor={editor}
-          onShowReferenceManager={() => setShowReferenceManager(true)}
+          onShowResearchAssistant={handleShowResearchAssistant}
           onExport={handleExport}
         />
         <div className="border-b p-2 flex justify-between items-center bg-gray-50">
@@ -263,27 +277,20 @@ const CollaborativeEditor = ({
       {/* Editor Content */}
       <div className="editor-container">
         <div className="a4-page">
-          <EditorContent 
-            editor={editor} 
-            className="prose prose-sm max-w-none focus:outline-none" 
+          <EditorContent
+            editor={editor}
+            className="prose prose-sm max-w-none focus:outline-none"
           />
         </div>
       </div>
 
       {/* Reference Manager Modal */}
-      {showReferenceManager && (
-        <Dialog
-          open={showReferenceManager}
-          onOpenChange={setShowReferenceManager}
-        >
-          <DialogContent className="sm:max-w-[900px] sm:h-[80vh]">
-            <ReferenceManager
-              onCitationSelect={handleCitationSelect}
-              citationService={citationServiceRef.current}
-              onClose={() => setShowReferenceManager(false)}
-            />
-          </DialogContent>
-        </Dialog>
+      {showResearchAssistant && (
+        <ResearchAssistant
+          onCitationSelect={handleCitationSelect}
+          onClose={() => setShowResearchAssistant(false)}
+          selectedText={selectedText}
+        />
       )}
     </div>
   );
