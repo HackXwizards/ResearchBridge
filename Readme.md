@@ -9,6 +9,7 @@ ResearchBridge is an innovative research platform developed for the Hypermode Kn
 
 ![Collaborative text editor](image-3.png)
 ![AI-powered research assistant integrated with modus](image-4.png)
+![AI suggestions](image-5.png)
 ## Key Features
 
 - Real-time collaborative text editor with multi-user support
