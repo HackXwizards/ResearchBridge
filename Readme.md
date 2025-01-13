@@ -10,6 +10,8 @@ ResearchBridge is an innovative research platform developed for the Hypermode Kn
 - Offer contextual research suggestions and gap analysis
 - Create a knowledge graph of research papers and their relationships
 
+
+
 ## Implementation
 
 ### Architecture

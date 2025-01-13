@@ -12,3 +12,4 @@ const SearchResults = ({ results }: { results: Publication[] }) => {
 };
 
 export default SearchResults;
+
