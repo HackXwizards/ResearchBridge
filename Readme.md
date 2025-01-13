@@ -11,6 +11,22 @@ ResearchBridge is an innovative research platform developed for the Hypermode Kn
 - Create a knowledge graph of research papers and their relationships
 
 
+## Screenshots
+
+![Project Overview](image.png)
+*Main dashboard showing the project interface*
+
+![How it Works](image-1.png)
+*Workflow diagram explaining the system architecture*
+
+![Collaborative Editor](image-3.png)
+*Real-time collaborative text editor interface*
+
+![AI Research Assistant](image-4.png)
+*AI-powered research assistant integrated with Modus*
+
+![User Profile](image-2.png)
+*User profile and research management page*
 
 ## Implementation
 
