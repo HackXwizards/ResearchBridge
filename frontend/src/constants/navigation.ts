@@ -15,5 +15,5 @@ export const navLinks: NavLink[] = [
   { path: '/login', label: 'Log In' },
   { path: '/signup', label: 'Sign Up' },
   { path: '/collaboration', label: 'Collaboration' },
-  { path: '/profile', label: 'Profile' }
+  // { path: '/profile', label: 'Profile' }
 ];
