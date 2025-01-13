@@ -11,6 +11,7 @@ ResearchBridge is an innovative research platform developed for the Hypermode Kn
 - Create a knowledge graph of research papers and their relationships
 
 Youtube Link - https://www.youtube.com/watch?v=FGaYIt-YvlQ
+
 Devpost Link - https://devpost.com/software/researchbridge
 
 
